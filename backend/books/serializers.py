@@ -101,7 +101,7 @@ class FavoriteSerializer(serializers.ModelSerializer):
     def validate(self, data):
         book = get_object_or_404(Book, id=self.context["view"].kwargs.get("book_id"))
 
-        if book.favorites_book.filter(
+        if book.favourites_book.filter(
             user__id=self.context["request"].user.id
         ).exists():
             raise serializers.ValidationError("Данная книга уже добавлена в избранное!")
@@ -113,14 +113,10 @@ class ShoppingListSerializer(FavoriteSerializer):
         model = ShoppingList
 
     def validate(self, data):
-        recipe = get_object_or_404(
-            Recipe, id=self.context["view"].kwargs.get("recipe_id")
-        )
+        book = get_object_or_404(Book, id=self.context["view"].kwargs.get("book_id"))
 
-        if recipe.shoppinglist_recipe.filter(
+        if book.shoppinglist_book.filter(
             user__id=self.context["request"].user.id
         ).exists():
-            raise serializers.ValidationError(
-                "Данный рецепт уже добавлен в список покупок!"
-            )
+            raise serializers.ValidationError("Данная книга уже добавлена в корзину!")
         return data
