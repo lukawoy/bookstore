@@ -141,7 +141,7 @@ REST_FRAMEWORK = {
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
     # Настроить доступ
-    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.AllowAny",),
+    "DEFAULT_PERMISSION_CLASSES": ("djoser.permissions.CurrentUserOrAdmin",),
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     "PAGE_SIZE": 5,
 }
@@ -155,7 +155,7 @@ DJOSER = {
     "HIDE_USERS": False,
     "SERIALIZERS": {
         "user": "users.serializers.UserSerializer",
-        # "current_user": "users.serializers.UserSerializer",
-        # "user_create": "users.serializers.UserCreateSerializer",
+        "current_user": "users.serializers.UserSerializer",
+        "user_create": "users.serializers.UserCreateSerializer",
     },
 }

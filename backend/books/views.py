@@ -21,6 +21,7 @@ class BookViewSet(viewsets.ReadOnlyModelViewSet):
         rating=Avg("book_review__score"), number_reviews=Count("book_review")
     )
     serializer_class = BookSerializer
+    permission_classes = (AllowAny,)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -87,10 +88,9 @@ class ActionShoppingListViewSet(ActionFavoriteViewSet):
         book = get_object_or_404(Book, id=book_id)
         if not book.shoppinglist_book.filter(user__id=request.user.id).exists():
             return Response(
-                {"errors": "Этой книги нет в корзине."},
-                status=HTTPStatus.BAD_REQUEST
+                {"errors": "Этой книги нет в корзине."}, status=HTTPStatus.BAD_REQUEST
             )
-        
+
         get_object_or_404(
             ShoppingList,
             user=self.request.user,
