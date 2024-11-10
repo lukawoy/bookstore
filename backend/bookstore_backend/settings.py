@@ -25,7 +25,7 @@ SECRET_KEY = os.getenv("SECRET_KEY", "DEFAULT_SECRET_KEY")
 
 DEBUG = os.getenv("MODE_DEBAG") == "True"
 
-ALLOWED_HOSTS = ["127.0.0.1"]
+ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 
 AUTH_USER_MODEL = "users.User"
 
@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "djoser",
     "books",
     "users",
+    "corsheaders",
 ]
 
 MIDDLEWARE = [
@@ -53,6 +54,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
 ]
 
 ROOT_URLCONF = "bookstore_backend.urls"
@@ -136,12 +138,14 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+CORS_ORIGIN_ALLOW_ALL = True
+
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
     # Настроить доступ
-    "DEFAULT_PERMISSION_CLASSES": ("djoser.permissions.CurrentUserOrAdmin",),
+    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.AllowAny",), # djoser.permissions.CurrentUserOrAdmin
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     "PAGE_SIZE": 5,
 }

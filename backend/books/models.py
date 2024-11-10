@@ -92,6 +92,11 @@ class ShoppingList(models.Model):
         verbose_name = "список покупок"
         verbose_name_plural = "Списки покупок"
         ordering = ["-user"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["book", "user"], name="unique_shopping"
+            ),
+        ]
 
     def __str__(self):
         return f"{self.book.title} - {self.user.username}"

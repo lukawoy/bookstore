@@ -34,6 +34,9 @@ class ReviewViewSet(viewsets.ModelViewSet):
             author_review=self.request.user,
             book=get_object_or_404(Book, id=self.kwargs.get("book_id")),
         )
+    
+    def get_queryset(self):
+        return Review.objects.filter(book=self.kwargs.get("book_id"))
 
 
 class MyFavoriteViewSet(viewsets.ReadOnlyModelViewSet):

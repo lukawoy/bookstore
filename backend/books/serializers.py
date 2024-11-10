@@ -65,10 +65,9 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         book = get_object_or_404(Book, id=self.context["view"].kwargs.get("book_id"))
-
         if book.book_review.filter(
             author_review_id=self.context["request"].user.id
-        ).exists():
+        ).exists() and self.context["request"].method != 'PUT':
             raise serializers.ValidationError("Вы уже оставили отзыв на эту книгу!")
         return data
 
@@ -79,13 +78,16 @@ class FavoriteSerializer(serializers.ModelSerializer):
         "get_image_url",
         read_only=True,
     )
-    author = serializers.CharField(source="book.author", read_only=True)
+    # author = serializers.CharField(source="books_author.id", read_only=True)
+    author = AuthorSerializer(many=True, read_only=True, source="book.author")
     price = serializers.CharField(source="book.price", read_only=True)
-
+    book_id = serializers.IntegerField(source="book.id", read_only=True)
+    
     class Meta:
         model = Favourites
         fields = (
             "id",
+            "book_id",
             "title",
             "image",
             "author",
