@@ -1,0 +1,35 @@
+/* footer.css */
+footer {
+    background-color: #333; /* Темный фон */
+    color: white; /* Белый текст */
+    padding: 20px 0; /* Отступы сверху и снизу */
+    text-align: center; /* Центрирование текста */
+    position: relative; /* Для позиционирования */
+    bottom: 0; /* Прикрепление к низу страницы */
+    width: 100%; /* Занимает всю ширину */
+}
+.footer-content {
+    max-width: 800px; /* Максимальная ширина содержимого */
+    margin: 0 auto; /* Центрирование содержимого */
+    padding: 0 20px; /* Горизонтальные отступы */
+}
+.footer-links {
+    list-style: none; /* Убирает маркеры списка */
+    padding: 0; /* Убирает отступы */
+    margin: 10px 0; /* Отступы сверху и снизу */
+}
+.footer-links li {
+    display: inline; /* Отображение ссылок в строку */
+    margin: 0 15px; /* Отступы между ссылками */
+}
+.footer-links a {
+    color: white; /* Цвет ссылок */
+    text-decoration: none; /* Убирает подчеркивание */
+}
+.footer-links a:hover {
+    text-decoration: underline; /* Подчеркивание при наведении */
+}
+.footer-copy {
+    margin-top: 10px; /* Отступ сверху */
+    font-size: 14px; /* Размер шрифта */
+}
