@@ -13,8 +13,6 @@ const Profile = () => {
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [showDeleteUserForm, setShowDeleteUserForm] = useState(false);
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -43,13 +41,10 @@ const Profile = () => {
         { headers: { Authorization: token } }
       );
       toast.success("Email успешно изменен!");
-      setError("");
       setNewEmail("");
       setPassword("");
     } catch (err) {
       toast.warn(`Ошибка: ${err.message}`);
-      setError("Ошибка при изменении email. Пожалуйста, попробуйте снова.");
-      setMessage("");
     }
   };
 
@@ -69,14 +64,10 @@ const Profile = () => {
         { headers: { Authorization: token } }
       );
       toast.success("Пароль успешно изменен!");
-      setMessage("Пароль успешно изменен!");
-      setError("");
       setPassword("");
       setNewPassword("");
     } catch (err) {
       toast.warn(`Ошибка: ${err.message}`);
-      setError("Ошибка при изменении пароля. Пожалуйста, попробуйте снова.");
-      setMessage("");
     }
   };
 

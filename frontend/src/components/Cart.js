@@ -37,6 +37,23 @@ const Cart = () => {
     fetchCartItems();
   }, [limit, offset]);
 
+  const getTotalQuantity = () => {
+    return cartItems.reduce((total) => total + 1, 0);
+  };
+
+  const getTotalPrice = () => {
+    let total = cartItems.reduce(
+      (total, item) => Number(item.price) + total,
+      0
+    );
+    return total;
+  };
+
+  const handleBuyClick = () => {
+    // В данный момент ничего не делаем
+    toast.success("Ура, книги куплены!");
+  };
+
   const handleNextPage = () => {
     setOffset((prevOffset) => prevOffset + limit);
   };
@@ -77,6 +94,12 @@ const Cart = () => {
         pauseOnHover={false}
       />
       <h1 className="header">Корзина</h1>
+      <div className="summary">
+        <p>Количество книг: {getTotalQuantity()}</p>
+        <p>Сумма всех покупок: {getTotalPrice()} руб.</p>
+        <button onClick={handleBuyClick}>Купить</button>
+      </div>
+
       {cartItems.length === 0 ? (
         <p>Корзина пуста.</p>
       ) : (

@@ -9,27 +9,46 @@ import "../styles/styles.css";
 
 const BookList = () => {
   const [books, setBooks] = useState([]);
+  const [inputSearchTerm, setInputSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [count, setCount] = useState(0);
   const [limit, setLimit] = useState(5);
   const [offset, setOffset] = useState(0);
+  const isAuthenticated = AuthService.isAuthenticated();
+
+  const extractBooks = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetchBooks(
+        limit,
+        offset,
+        encodeURIComponent(searchTerm)
+      );
+      setBooks(response.data.results);
+      setCount(response.data.count);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const extractBooks = async () => {
-      try {
-        const response = await fetchBooks(limit, offset);
-        setBooks(response.data.results);
-        setCount(response.data.count);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     extractBooks();
-  }, [offset, limit]);
+  }, [offset, searchTerm]);
+
+  const handleInputChange = (event) => {
+    setInputSearchTerm(event.target.value);
+  };
+
+  const handleSearchSubmit = (event) => {
+    event.preventDefault();
+    setSearchTerm(inputSearchTerm);
+    setOffset(0);
+  };
 
   const handleNextPage = () => {
     setOffset((prevOffset) => prevOffset + limit);
@@ -65,8 +84,8 @@ const BookList = () => {
       if (err.response && err.response.status === 400) {
         toast.warn("Эта книга уже добавлена в избранное.");
       } else {
-        setError(err.message);
         toast.warn(`Ошибка: ${err.message}`);
+        setError(err.message);
       }
     }
   };
@@ -90,37 +109,63 @@ const BookList = () => {
       />
       <div className="header">
         <h1>Список книг</h1>
+
+        <form onSubmit={handleSearchSubmit}>
+          <input
+            type="text"
+            placeholder="Поиск по названию книги..."
+            value={inputSearchTerm}
+            onChange={handleInputChange}
+          />
+          <button type="submit">Поиск</button>
+        </form>
       </div>
+
       <div className="grid-container">
-        {books.map((book) => (
-          <div key={book.id} className="book-card">
-            <div className="grid-item">
-              <Link to={`/books/${book.id}`} className="no-underline">
-                <h2>{book.title}</h2>
-              </Link>
-              <Book
-                image={book.image}
-                author_last_name={book.author.map((author) => author.last_name)}
-                author_first_name={book.author.map(
-                  (author) => author.first_name
-                )}
-                author_middle_name={book.author.map(
-                  (author) => author.middle_name
-                )}
-                releaseDate={book.release_date}
-                description={book.description}
-                price={book.price}
-                rating={book.rating}
-              />
-              <button onClick={() => handleAddToCart(book.id)}>
-                Добавить в корзину
-              </button>
-              <button onClick={() => handleAddToFavorite(book.id)}>
-                Добавить в избранное
-              </button>
+        {books.length > 0 ? (
+          books.map((book) => (
+            <div key={book.id} className="book-card">
+              <div className="grid-item">
+                <Link to={`/books/${book.id}`} className="no-underline">
+                  <h2>{book.title}</h2>
+                </Link>
+                <Book
+                  image={book.image}
+                  author_last_name={book.author.map(
+                    (author) => author.last_name
+                  )}
+                  author_first_name={book.author.map(
+                    (author) => author.first_name
+                  )}
+                  author_middle_name={book.author.map(
+                    (author) => author.middle_name
+                  )}
+                  releaseDate={book.release_date}
+                  description={book.description}
+                  price={book.price}
+                  rating={book.rating}
+                />
+
+                <div>
+                  {isAuthenticated ? (
+                    <div>
+                      <button onClick={() => handleAddToCart(book.id)}>
+                        Добавить в корзину
+                      </button>
+                      <button onClick={() => handleAddToFavorite(book.id)}>
+                        Добавить в избранное
+                      </button>
+                    </div>
+                  ) : (
+                    <div></div>
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
-        ))}
+          ))
+        ) : (
+          <h1>Книги не найдены</h1>
+        )}
       </div>
       <div className="pagination">
         <button onClick={handlePreviousPage} disabled={offset === 0}>

@@ -7,9 +7,9 @@ import {
 import BookList from "./components/BookList";
 import Login from "./components/Login";
 import Register from "./components/Register";
-import Cart from "./components/Cart"; // Добавьте позже
-import Favorites from "./components/Favorites"; // Добавьте позже
-import Reviews from "./components/Reviews"; // Добавьте позже
+import Cart from "./components/Cart";
+import Favorites from "./components/Favorites";
+import Reviews from "./components/Reviews";
 
 import Footer from "./components/Footer";
 import Header from "./components/Header";

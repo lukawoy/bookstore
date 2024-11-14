@@ -215,12 +215,20 @@ const BookCard = () => {
         <strong>Рейтинг:</strong> {book.rating}
       </p>
 
-      <button onClick={() => handleAddToCart(book.id)}>
-        Добавить в корзину
-      </button>
-      <button onClick={() => handleAddToFavorite(book.id)}>
-        Добавить в избранное
-      </button>
+      <div>
+        {isAuthenticated ? (
+          <div>
+            <button onClick={() => handleAddToCart(book.id)}>
+              Добавить в корзину
+            </button>
+            <button onClick={() => handleAddToFavorite(book.id)}>
+              Добавить в избранное
+            </button>
+          </div>
+        ) : (
+          <div></div>
+        )}
+      </div>
 
       <h3>Отзывы</h3>
       <ul className="reviews-container">

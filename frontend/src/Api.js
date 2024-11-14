@@ -15,7 +15,7 @@ export const fetchDeleteCard = (headers, bookId) => api.delete(`books/${bookId}/
 export const fetchAddCard = (headers, bookId, data) => api.post(`books/${bookId}/shopinglist/`, headers, data);
 
 // Book
-export const fetchBooks = (limit, offset) => api.get(`books/?limit=${limit}&offset=${offset}`);
+export const fetchBooks = (limit, offset, search) => api.get(`books/?limit=${limit}&offset=${offset}&search=${search}`);
 export const fetchOneBook = (bookId) => api.get(`books/${bookId}/`);
 
 // Review
