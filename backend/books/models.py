@@ -1,7 +1,13 @@
-from django.db import models
 from django.contrib.auth import get_user_model
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import models
 
+from bookstore_backend.settings import (
+    MAXIMUM_PRICE,
+    MAXIMUM_SCORE,
+    MINIMUM_PRICE,
+    MINIMUM_SCORE,
+)
 User = get_user_model()
 
 
@@ -15,7 +21,7 @@ class Author(models.Model):
         verbose_name_plural = "авторы"
         ordering = ["-last_name"]
 
-    def __str__(self):  # ------------------- Сделать лучше!
+    def __str__(self):
         if not self.middle_name:
             return f"{self.last_name} {self.first_name[0]}."
 
@@ -30,9 +36,8 @@ class Book(models.Model):
     price = models.IntegerField(
         "Цена",
         validators=[
-            # в settings добавить значения
-            MinValueValidator(1),
-            MaxValueValidator(10000),
+            MinValueValidator(MINIMUM_PRICE),
+            MaxValueValidator(MAXIMUM_PRICE),
         ],
     )
     author = models.ManyToManyField(Author, verbose_name="Автор", through="AuthorBook")
@@ -93,9 +98,7 @@ class ShoppingList(models.Model):
         verbose_name_plural = "Списки покупок"
         ordering = ["-user"]
         constraints = [
-            models.UniqueConstraint(
-                fields=["book", "user"], name="unique_shopping"
-            ),
+            models.UniqueConstraint(fields=["book", "user"], name="unique_shopping"),
         ]
 
     def __str__(self):
@@ -116,9 +119,8 @@ class Review(models.Model):
     score = models.IntegerField(
         "Оценка",
         validators=[
-            # Значения в settings
-            MinValueValidator(1),
-            MaxValueValidator(10),
+            MinValueValidator(MINIMUM_SCORE),
+            MaxValueValidator(MAXIMUM_SCORE),
         ],
     )
 

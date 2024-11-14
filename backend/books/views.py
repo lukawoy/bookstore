@@ -1,19 +1,19 @@
-from django.shortcuts import render
-from rest_framework import viewsets
-from django.shortcuts import get_object_or_404
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from http import HTTPStatus
 
-from .models import Book, Favourites, ShoppingList, Review
+from django.db.models import Avg, Count
+from django.shortcuts import get_object_or_404
+from rest_framework import filters, viewsets
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+
+from .models import Book, Favourites, Review, ShoppingList
+from .permissions import AuthorPermission
 from .serializers import (
     BookSerializer,
-    ReviewSerializer,
     FavoriteSerializer,
+    ReviewSerializer,
     ShoppingListSerializer,
 )
-from .permissions import AuthorPermission
-from rest_framework.response import Response
-from http import HTTPStatus
-from django.db.models import Avg, Count
 
 
 class BookViewSet(viewsets.ReadOnlyModelViewSet):
@@ -22,6 +22,8 @@ class BookViewSet(viewsets.ReadOnlyModelViewSet):
     )
     serializer_class = BookSerializer
     permission_classes = (AllowAny,)
+    filter_backends = [filters.SearchFilter]
+    search_fields = ["title"]
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -34,7 +36,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
             author_review=self.request.user,
             book=get_object_or_404(Book, id=self.kwargs.get("book_id")),
         )
-    
+
     def get_queryset(self):
         return Review.objects.filter(book=self.kwargs.get("book_id"))
 
@@ -44,7 +46,9 @@ class MyFavoriteViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        return Favourites.objects.filter(user=self.request.user)
+        return Favourites.objects.filter(user=self.request.user).annotate(
+            number_reviews=Count("book__book_review")
+        )
 
 
 class ActionFavoriteViewSet(viewsets.ModelViewSet):

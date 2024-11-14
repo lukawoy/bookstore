@@ -1,11 +1,11 @@
-import os
-from rest_framework import serializers
-from django.core.files.base import ContentFile
-from django.shortcuts import get_object_or_404
 import base64
 
-from .models import Book, Favourites, ShoppingList, Review, Author
+from django.core.files.base import ContentFile
+from django.shortcuts import get_object_or_404
+from rest_framework import serializers
 from users.serializers import UserSerializer
+
+from .models import Author, Book, Favourites, Review, ShoppingList
 
 
 class Base64ImageField(serializers.ImageField):
@@ -65,9 +65,12 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         book = get_object_or_404(Book, id=self.context["view"].kwargs.get("book_id"))
-        if book.book_review.filter(
-            author_review_id=self.context["request"].user.id
-        ).exists() and self.context["request"].method != 'PUT':
+        if (
+            book.book_review.filter(
+                author_review_id=self.context["request"].user.id
+            ).exists()
+            and self.context["request"].method != "PUT"
+        ):
             raise serializers.ValidationError("Вы уже оставили отзыв на эту книгу!")
         return data
 
@@ -78,11 +81,11 @@ class FavoriteSerializer(serializers.ModelSerializer):
         "get_image_url",
         read_only=True,
     )
-    # author = serializers.CharField(source="books_author.id", read_only=True)
     author = AuthorSerializer(many=True, read_only=True, source="book.author")
     price = serializers.CharField(source="book.price", read_only=True)
     book_id = serializers.IntegerField(source="book.id", read_only=True)
-    
+    number_reviews = serializers.IntegerField(read_only=True)
+
     class Meta:
         model = Favourites
         fields = (
@@ -92,11 +95,11 @@ class FavoriteSerializer(serializers.ModelSerializer):
             "image",
             "author",
             "price",
+            "number_reviews",
         )
 
     def get_image_url(self, obj):
         if obj.book.image:
-            # return f'https://{os.getenv("DOMAIN")}{obj.book.image.url}'
             return f"https://DOMAIN.ru/{obj.book.image.url}"
         return None
 
