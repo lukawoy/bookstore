@@ -22,9 +22,9 @@ class AuthorSerializer(serializers.ModelSerializer):
         model = Author
         fields = (
             "id",
+            "last_name",
             "first_name",
             "middle_name",
-            "last_name",
         )
 
 
