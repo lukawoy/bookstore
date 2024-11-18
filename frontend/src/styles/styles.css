@@ -116,6 +116,13 @@ body {
     background-color: #f9f9f9; /* Фоновый цвет */
     text-decoration: none;
 }
+
+.book-image {
+    width: 100%;
+    height: 150px; /* Фиксированная высота для изображения */
+    object-fit: cover; /* Изображение будет обрезано, чтобы заполнить контейнер */
+}
+
 .pagination {
     display: flex;
     justify-content: center; /* Центрирование кнопок пагинации */
