@@ -9,7 +9,7 @@ from books.models import Book, Author
 
 TABLES = {
     Author: 'Authors.csv',
-    Book: 'Books.csv',
+    # Book: 'Books.csv',
 }
 
 source_directory = f'{settings.BASE_DIR}/inital_data/images'
@@ -22,7 +22,7 @@ class Command(BaseCommand):
         # Загрузка данных из .csv
         for model, csv_file in TABLES.items():
             path_file = f'{settings.BASE_DIR}/inital_data/{csv_file}'
-            with open(path_file, mode='r', encoding='Windows-1251') as file:
+            with open(path_file, mode='r', encoding='utf-8-sig') as file:
                 reader = csv.DictReader(file)
                 model_objects = []
                 for row in reader:
