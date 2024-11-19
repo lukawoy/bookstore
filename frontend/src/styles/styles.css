@@ -69,6 +69,7 @@ body {
     gap: 20px;
 }
 .book-card {
+    height: 800px; /* Фиксированная высота карточки */
     text-decoration: none;
     background: white;
     border: 1px solid #ddd;
@@ -76,6 +77,15 @@ body {
     padding: 15px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     transition: transform 0.2s;
+}
+.book-description {
+    flex-grow: 1; /* Позволяет тексту занимать оставшееся пространство */
+    overflow: hidden; /* Скрывает переполнение */
+    text-overflow: ellipsis; /* Добавляет троеточие */
+    display: -webkit-box; /* Для поддержки обрезки текста в WebKit браузерах */
+    -webkit-box-orient: vertical; 
+    -webkit-line-clamp: 3; /* Количество строк для отображения */
+    line-clamp: 3; /* Количество строк для отображения (для других браузеров) */
 }
 .book-card:hover {
     transform: scale(1.05);
@@ -118,9 +128,11 @@ body {
 }
 
 .book-image {
-    width: 100%;
-    height: 150px; /* Фиксированная высота для изображения */
-    object-fit: cover; /* Изображение будет обрезано, чтобы заполнить контейнер */
+    width: 100%; /* Занимает всю ширину карточки */
+    height: 150px; /* Фиксированная высота */
+    object-fit: contain; /* Сохраняет пропорции изображения, не обрезая его */
+    display: block; /* Убирает пробелы под изображением */
+
 }
 
 .pagination {

@@ -144,6 +144,7 @@ const BookList = () => {
                   description={book.description}
                   price={book.price}
                   rating={book.rating}
+                  number_reviews={book.number_reviews}
                 />
 
                 <div>

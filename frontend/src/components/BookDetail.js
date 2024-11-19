@@ -11,6 +11,7 @@ const Book = ({
   price,
   rating,
   image,
+  number_reviews,
 }) => {
   let full_name_author;
   if (author_middle_name[0]) {
@@ -43,6 +44,9 @@ const Book = ({
         <strong>Рейтинг:</strong> {rating}
       </p>
       <p>
+        <strong>Количество отзывов:</strong> {number_reviews}
+      </p>
+      <p className="book-description">
         <strong>Описание:</strong> {description}
       </p>
     </div>

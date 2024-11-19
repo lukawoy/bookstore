@@ -19,7 +19,7 @@ from .serializers import (
 class BookViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Book.objects.annotate(
         rating=Avg("book_review__score"), number_reviews=Count("book_review")
-    )
+    ).order_by("?")
     serializer_class = BookSerializer
     permission_classes = (AllowAny,)
     filter_backends = [filters.SearchFilter]

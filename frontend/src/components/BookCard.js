@@ -199,7 +199,7 @@ const BookCard = () => {
       <p className="book-author">
         <strong>Автор:</strong> {book_author_name}
       </p>
-      <p className="book-description">
+      <p>
         <strong>Описание:</strong> {book.description}
       </p>
       <p>
