@@ -1,11 +1,15 @@
 import base64
+import os
 
+from dotenv import load_dotenv
 from django.core.files.base import ContentFile
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from users.serializers import UserSerializer
 
 from .models import Author, Book, Favourites, Review, ShoppingList
+
+load_dotenv(override=True)
 
 
 class Base64ImageField(serializers.ImageField):
@@ -100,7 +104,7 @@ class FavoriteSerializer(serializers.ModelSerializer):
 
     def get_image_url(self, obj):
         if obj.book.image:
-            return f"https://DOMAIN.ru/{obj.book.image.url}"
+            return f"https://{os.getenv('DOMAIN')}{obj.book.image.url}"
         return None
 
     def validate(self, data):
