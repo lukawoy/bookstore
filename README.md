@@ -24,4 +24,7 @@
 - Docker (compose)
 - Github CI/CD
 
+### API
+Документация API находится по ссылке  https://lukabookstore.hopto.org/redoc/
+
 Разработчик - Лукин Дмитрий.
