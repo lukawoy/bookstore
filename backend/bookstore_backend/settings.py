@@ -141,6 +141,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # CORS_ORIGIN_ALLOW_ALL = True
 
+CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_HTTPONLY = True  
 CSRF_TRUSTED_ORIGINS = [f"https://{os.getenv('DOMAIN')}"]
 
 REST_FRAMEWORK = {
