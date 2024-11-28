@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { fetchBooks, fetchAddCard, fetchAddFavorite } from "../Api";
+import {
+  fetchBooks,
+  fetchAddCard,
+  fetchAddFavorite,
+  fetchRandBook,
+} from "../Api";
 import Book from "./BookDetail";
 import AuthService from "./AuthService";
 import { ToastContainer, toast } from "react-toastify";
@@ -9,6 +14,8 @@ import "../styles/styles.css";
 
 const BookList = () => {
   const [books, setBooks] = useState([]);
+  const [randomBooks, setRandomBooks] = useState([]);
+  const [randomBooksFlag, setRandomBooksFlag] = useState(false);
   const [inputSearchTerm, setInputSearchTerm] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
@@ -19,16 +26,25 @@ const BookList = () => {
   const isAuthenticated = AuthService.isAuthenticated();
 
   const extractBooks = async () => {
-    setLoading(true);
+    // setLoading(true);
     setError(null);
+    const token = AuthService.getAccessToken();
     try {
       const response = await fetchBooks(
+        { headers: { Authorization: token } },
         limit,
         offset,
         encodeURIComponent(searchTerm)
       );
       setBooks(response.data.results);
       setCount(response.data.count);
+      if (!randomBooksFlag) {
+        const response_1 = await fetchRandBook({
+          headers: { Authorization: token },
+        });
+        setRandomBooks(response_1.data);
+        setRandomBooksFlag(true);
+      }
     } catch (error) {
       setError(error.message);
     } finally {
@@ -53,9 +69,11 @@ const BookList = () => {
   const handleNextPage = () => {
     setOffset((prevOffset) => prevOffset + limit);
   };
+
   const handlePreviousPage = () => {
     setOffset((prevOffset) => Math.max(prevOffset - limit, 0));
   };
+
   const handleAddToCart = async (bookId) => {
     const token = AuthService.getAccessToken();
 
@@ -71,6 +89,7 @@ const BookList = () => {
         setError(err.message);
       }
     }
+    extractBooks();
   };
 
   const handleAddToFavorite = async (bookId) => {
@@ -88,6 +107,7 @@ const BookList = () => {
         setError(err.message);
       }
     }
+    extractBooks();
   };
 
   if (loading) {
@@ -120,6 +140,42 @@ const BookList = () => {
           <button type="submit">Поиск</button>
         </form>
       </div>
+      <div>
+        <h2>Подборка случайных книг</h2>
+      </div>
+      <div className="grid-container-rand">
+        {randomBooks.length > 0 ? (
+          randomBooks.map((book) => (
+            <div key={book.id} className="book-card-rand">
+              <div className="grid-item-rand">
+                <Link to={`/books/${book.id}`} className="no-underline">
+                  <h3>{book.title}</h3>
+                </Link>
+                <Book
+                  image={book.image}
+                  style_image="book-image-rand"
+                  author_last_name={book.author.map(
+                    (author) => author.last_name
+                  )}
+                  author_first_name={book.author.map(
+                    (author) => author.first_name
+                  )}
+                  author_middle_name={book.author.map(
+                    (author) => author.middle_name
+                  )}
+                  releaseDate={book.release_date}
+                  description={book.description}
+                  price={book.price}
+                  rating={book.rating}
+                  number_reviews={book.number_reviews}
+                />
+              </div>
+            </div>
+          ))
+        ) : (
+          <h1>Книги не найдены</h1>
+        )}
+      </div>
 
       <div className="grid-container">
         {books.length > 0 ? (
@@ -127,10 +183,13 @@ const BookList = () => {
             <div key={book.id} className="book-card">
               <div className="grid-item">
                 <Link to={`/books/${book.id}`} className="no-underline">
-                  <h2>{book.title}</h2>
+                  <h2>
+                    {book.title} {book.is_favorite}
+                  </h2>
                 </Link>
                 <Book
                   image={book.image}
+                  style_image="book-image"
                   author_last_name={book.author.map(
                     (author) => author.last_name
                   )}
@@ -150,12 +209,20 @@ const BookList = () => {
                 <div>
                   {isAuthenticated ? (
                     <div>
-                      <button onClick={() => handleAddToCart(book.id)}>
-                        Добавить в корзину
-                      </button>
-                      <button onClick={() => handleAddToFavorite(book.id)}>
-                        Добавить в избранное
-                      </button>
+                      {!book.is_shopping_list ? (
+                        <button onClick={() => handleAddToCart(book.id)}>
+                          Добавить в корзину
+                        </button>
+                      ) : (
+                        <button>Уже в корзине</button>
+                      )}
+                      {!book.is_favorite ? (
+                        <button onClick={() => handleAddToFavorite(book.id)}>
+                          Добавить в избранное
+                        </button>
+                      ) : (
+                        <button>Уже в избранном</button>
+                      )}
                     </div>
                   ) : (
                     <div></div>
@@ -168,6 +235,7 @@ const BookList = () => {
           <h1>Книги не найдены</h1>
         )}
       </div>
+
       <div className="pagination">
         <button onClick={handlePreviousPage} disabled={offset === 0}>
           Предыдущая

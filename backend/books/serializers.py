@@ -37,6 +37,9 @@ class BookSerializer(serializers.ModelSerializer):
     author = AuthorSerializer(many=True, read_only=True)
     rating = serializers.DecimalField(read_only=True, max_digits=10, decimal_places=2)
     number_reviews = serializers.IntegerField(read_only=True)
+    release_date = serializers.DateField(format="%d.%m.%Y")
+    is_favorite = serializers.SerializerMethodField()
+    is_shopping_list = serializers.SerializerMethodField()
 
     class Meta:
         model = Book
@@ -50,12 +53,23 @@ class BookSerializer(serializers.ModelSerializer):
             "author",
             "number_reviews",
             "rating",
+            "is_favorite",
+            "is_shopping_list",
         )
+
+    def get_is_favorite(self, obj):
+        return obj.favourites_book.filter(
+            user__id=self.context["request"].user.id
+        ).exists()
+
+    def get_is_shopping_list(self, obj):
+        return obj.shoppinglist_book.filter(
+            user__id=self.context["request"].user.id
+        ).exists()
 
 
 class ReviewSerializer(serializers.ModelSerializer):
     author_review = UserSerializer(many=False, read_only=True)
-    book = BookSerializer(many=False, read_only=True)
 
     class Meta:
         model = Review
@@ -63,7 +77,6 @@ class ReviewSerializer(serializers.ModelSerializer):
             "id",
             "author_review",
             "text",
-            "book",
             "score",
         )
 

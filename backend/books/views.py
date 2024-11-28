@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import filters, viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.decorators import action
 
 from .models import Book, Favourites, Review, ShoppingList
 from .permissions import AuthorPermission
@@ -19,11 +20,17 @@ from .serializers import (
 class BookViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Book.objects.annotate(
         rating=Avg("book_review__score"), number_reviews=Count("book_review")
-    ).order_by("?")
+    )
     serializer_class = BookSerializer
     permission_classes = (AllowAny,)
     filter_backends = [filters.SearchFilter]
     search_fields = ["title"]
+
+    @action(detail=False, methods=["GET"])
+    def random_book(self, request):
+        random_books = Book.objects.order_by("?")[:5]
+        serializer = self.get_serializer(random_books, many=True)
+        return Response(serializer.data)
 
     def list(self, request, *args, **kwargs):
         """Получить список всех книг."""

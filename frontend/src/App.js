@@ -23,7 +23,7 @@ const App = () => {
         <Header />
         <Routes>
           <Route exact path="/" element={<BookList />} />
-          <Route path="/auth/jwt/create" element={<Login />} />
+          <Route path="/auth/login" element={<Login />} />
           <Route path="/users" element={<Register />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/favorites" element={<Favorites />} />

@@ -9,6 +9,7 @@ body {
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
+    
 }
 .summary {
     border: 1px solid #ddd;
@@ -111,6 +112,74 @@ body {
 }
 
 /*  */
+
+.grid-container-rand {
+    width: 100%;
+    display: flex;
+    place-items: center;
+    justify-content: flex-end;
+    grid-template-columns: repeat(5, 1fr); /* 5 столбца */
+    grid-template-rows: repeat(1, auto); /*1 строки*/
+    gap: 8px; /* Расстояние между элементами */
+    margin-bottom: 20px; /* Отступ снизу для пагинации */
+    font-size: 14px;
+    background-color: #ffffffa6;
+    
+}
+.grid-item-rand {
+    border: 1px solid #ccc; /* Граница для элементов */
+    border-radius: 8px; /* Закругление углов */
+    padding: 8px; /* Внутренние отступы */
+    text-align: center; /* Выравнивание текста по центру */
+    background-color: #dce7ff; /* Фоновый цвет */
+    text-decoration: none;
+    
+}
+.book-image-rand {
+    width: 100%; /* Занимает всю ширину карточки */
+    height: 150px; /* Фиксированная высота */
+    object-fit: contain; /* Сохраняет пропорции изображения, не обрезая его */
+    display: block; /* Убирает пробелы под изображением */
+
+}
+.book-card-rand {
+    height: 500px; /* Фиксированная высота карточки */
+    width: 150px;
+    text-decoration: none;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+    
+    
+}
+.book-card-rand:hover {
+    transform: scale(1.05);
+}
+.book-card-rand h3 {
+    text-decoration: none;
+    margin: 0 0 10px;
+    
+}
+.book-card-rand p {
+    margin: 5px 0;
+    /* font-size: 12px; */
+}
+.book-card-rand button {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.book-card-rand button:hover {
+    background-color: #0056b3;
+}
+
 .grid-container {
     display: grid;
     grid-template-columns: repeat(2, 1fr); /* 2 столбца */

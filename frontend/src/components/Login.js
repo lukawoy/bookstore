@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import AuthService from "./AuthService";
 import { useNavigate } from "react-router-dom";
 import "../styles/Login.css";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -10,12 +12,22 @@ const Login = () => {
 
   const handleLogin = (e) => {
     e.preventDefault();
-
     AuthService.login(email, password, history);
+
+    setTimeout(() => {
+      toast.warn("Неверный логин или пароль!");
+    }, 1000); // Задержка в 1 секунду (костыль)
   };
 
   return (
     <div className="login-container">
+      <ToastContainer
+        position="bottom-right"
+        autoClose={3000}
+        closeOnClick
+        pauseOnFocusLoss={false}
+        pauseOnHover={false}
+      />
       <h2 className="login-title">Вход</h2>
       <form onSubmit={handleLogin}>
         <input

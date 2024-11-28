@@ -8,6 +8,7 @@ from bookstore_backend.settings import (
     MINIMUM_PRICE,
     MINIMUM_SCORE,
 )
+
 User = get_user_model()
 
 

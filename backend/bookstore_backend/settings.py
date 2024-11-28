@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     "books",
     "users",
     "drf_yasg",
+    # "corsheaders"
 ]
 
 MIDDLEWARE = [
@@ -43,6 +44,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # "corsheaders.middleware.CorsMiddleware",
 ]
 
 ROOT_URLCONF = "bookstore_backend.urls"
@@ -99,6 +101,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        'OPTIONS': {
+            'min_length': 8,
+        }
     },
     {
         "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
@@ -172,4 +177,4 @@ DJOSER = {
 MINIMUM_PRICE = 1
 MAXIMUM_PRICE = 99999999
 MINIMUM_SCORE = 1
-MAXIMUM_SCORE = 10
+MAXIMUM_SCORE = 5

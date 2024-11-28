@@ -24,27 +24,38 @@ const BookCard = () => {
   const [error, setError] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [newReviewText, setNewReviewText] = useState("");
-  const [newReviewScore, setNewReviewScore] = useState(1);
+  const [newReviewScore, setNewReviewScore] = useState(5);
   const [editingReviewId, setEditingReviewId] = useState(null);
   const [editingReviewText, setEditingReviewText] = useState("");
-  const [editingReviewScore, setEditingReviewScore] = useState(1);
-  const [username, setUsername] = useState("");
+  const [editingReviewScore, setEditingReviewScore] = useState(5);
+  const [email, setEmail] = useState("");
   const isAuthenticated = AuthService.isAuthenticated();
 
-  useEffect(() => {
-    const fetchBook = async () => {
-      try {
-        const response = await fetchOneBook(bookId);
-        setBook(response.data);
-        setAuthorName(
-          `${response.data.author.map((author) => author.last_name)} 
+  const fetchBook = async () => {
+    const token = AuthService.getAccessToken();
+    try {
+      const response = await fetchOneBook(
+        { headers: { Authorization: token } },
+        bookId
+      );
+      setBook(response.data);
+      setAuthorName(
+        `${response.data.author.map((author) => author.last_name)} 
                 ${response.data.author.map((author) => author.first_name)} 
                 ${response.data.author.map((author) => author.middle_name)}`
-        );
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
+      );
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      const userData = await AuthService.getUserProfile();
+      if (isAuthenticated && userData) {
+        setEmail(userData.email);
       }
     };
     const fetchReviews = async () => {
@@ -53,12 +64,6 @@ const BookCard = () => {
         setReviews(response.data.results);
       } catch (err) {
         setError(err.message);
-      }
-    };
-    const fetchUserProfile = async () => {
-      const userData = await AuthService.getUserProfile();
-      if (isAuthenticated && userData) {
-        setUsername(userData.username);
       }
     };
 
@@ -91,6 +96,7 @@ const BookCard = () => {
         toast.warn(`Ошибка: ${err.message}`);
       }
     }
+    fetchBook();
   };
 
   const handleEditReview = async (reviewId) => {
@@ -122,7 +128,10 @@ const BookCard = () => {
         toast.warn(`Ошибка: ${err.message}`);
       }
     }
+
+    fetchBook();
   };
+  
   const handleDeleteReview = async (reviewId) => {
     const token = AuthService.getAccessToken();
     try {
@@ -141,6 +150,7 @@ const BookCard = () => {
         toast.warn(`Ошибка: ${err.message}`);
       }
     }
+    fetchBook();
   };
 
   const handleAddToCart = async (bookId) => {
@@ -156,6 +166,7 @@ const BookCard = () => {
         toast.warn(`Ошибка: ${err.message}`);
       }
     }
+    fetchBook();
   };
 
   const handleAddToFavorite = async (bookId) => {
@@ -171,6 +182,7 @@ const BookCard = () => {
         toast.warn(`Ошибка: ${err.message}`);
       }
     }
+    fetchBook();
   };
 
   if (loading) {
@@ -218,12 +230,16 @@ const BookCard = () => {
       <div>
         {isAuthenticated ? (
           <div>
-            <button onClick={() => handleAddToCart(book.id)}>
-              Добавить в корзину
-            </button>
-            <button onClick={() => handleAddToFavorite(book.id)}>
-              Добавить в избранное
-            </button>
+            {!book.is_shopping_list && (
+              <button onClick={() => handleAddToCart(book.id)}>
+                Добавить в корзину
+              </button>
+            )}
+            {!book.is_favorite && (
+              <button onClick={() => handleAddToFavorite(book.id)}>
+                Добавить в избранное
+              </button>
+            )}
           </div>
         ) : (
           <div></div>
@@ -249,7 +265,7 @@ const BookCard = () => {
                   type="number"
                   value={editingReviewScore}
                   min="1"
-                  max="10"
+                  max="5"
                   onChange={(e) =>
                     setEditingReviewScore(Number(e.target.value))
                   }
@@ -262,11 +278,11 @@ const BookCard = () => {
             ) : (
               <div>
                 <p className="review-author">
-                  Автор отзыва: {review.author_review.username}. Оценка:{" "}
+                  Автор отзыва: {review.author_review.email}. Оценка:{" "}
                   {review.score} ★
                 </p>
                 <p className="review-text">{review.text}</p>
-                {review.author_review.username === username && (
+                {review.author_review.email === email && (
                   <div>
                     <button
                       onClick={() => {
@@ -311,11 +327,6 @@ const BookCard = () => {
                   <option value="3">3 ★</option>
                   <option value="4">4 ★</option>
                   <option value="5">5 ★</option>
-                  <option value="6">6 ★</option>
-                  <option value="7">7 ★</option>
-                  <option value="8">8 ★</option>
-                  <option value="9">9 ★</option>
-                  <option value="10">10 ★</option>
                 </select>
               </div>
               <button type="submit" className="review-submit">
@@ -324,7 +335,7 @@ const BookCard = () => {
             </form>
           </div>
         ) : (
-          <Link to={"/auth/jwt/create/"} className="no-underline">
+          <Link to={"/auth/login/"} className="no-underline">
             <h3>Авторизуйтесь, чтобы оставить отзыв.</h3>
           </Link>
         )}

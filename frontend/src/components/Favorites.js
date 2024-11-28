@@ -15,25 +15,25 @@ const Favorites = () => {
   const [limit, setLimit] = useState(5);
   const [offset, setOffset] = useState(0);
 
+  const fetchFavorItems = async () => {
+    const token = AuthService.getAccessToken();
+
+    try {
+      const response = await fetchMyFavorite(
+        { headers: { Authorization: token } },
+        limit,
+        offset
+      );
+      setFavorItems(response.data.results);
+      setCount(response.data.count);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchFavorItems = async () => {
-      const token = AuthService.getAccessToken();
-
-      try {
-        const response = await fetchMyFavorite(
-          { headers: { Authorization: token } },
-          limit,
-          offset
-        );
-        setFavorItems(response.data.results);
-        setCount(response.data.count);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchFavorItems();
   }, [limit, offset]);
 
@@ -57,6 +57,7 @@ const Favorites = () => {
       setError(err.message);
       toast.warn(`Ошибка: ${err.message}`);
     }
+    fetchFavorItems();
   };
 
   if (loading) {

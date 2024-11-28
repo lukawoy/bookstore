@@ -7,8 +7,6 @@ from django.db import models
 class User(AbstractUser):
     username = models.CharField(
         "Логин",
-        unique=True,
-        db_index=True,
         max_length=150,
         validators=[validators.RegexValidator(r"^[\w.@+-]+\Z")],
     )
@@ -25,4 +23,4 @@ class User(AbstractUser):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.username
+        return f"{self.last_name} {self.first_name} {self.email}"

@@ -12,6 +12,7 @@ const Book = ({
   rating,
   image,
   number_reviews,
+  style_image,
 }) => {
   let full_name_author;
   if (author_middle_name[0]) {
@@ -31,7 +32,7 @@ const Book = ({
 
   return (
     <div className="book">
-      <img src={image} alt={title} className="book-image"/>
+      <img src={image} alt={title} className={style_image} />
       <h2>{title}</h2>
       {full_name_author}
       <p>

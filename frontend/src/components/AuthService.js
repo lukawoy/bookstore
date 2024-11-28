@@ -52,9 +52,8 @@ export default {
     return false;
   },
 
-  register(username, email, password, first_name, last_name, history) {
+  register(email, password, first_name, last_name, history) {
     return fetchRegister({
-      username,
       email,
       password,
       first_name,
@@ -67,7 +66,7 @@ export default {
           localStorage.setItem("refreshToken", refresh);
         }
 
-        history("/auth/jwt/create");
+        history("/auth/login");
       })
       .catch((err) => {
         console.log(err);

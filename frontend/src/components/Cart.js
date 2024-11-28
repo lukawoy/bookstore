@@ -15,25 +15,25 @@ const Cart = () => {
   const [limit, setLimit] = useState(5);
   const [offset, setOffset] = useState(0);
 
+  const fetchCartItems = async () => {
+    const token = AuthService.getAccessToken();
+
+    try {
+      const response = await fetchCard(
+        { headers: { Authorization: token } },
+        limit,
+        offset
+      );
+      setCartItems(response.data.results);
+      setCount(response.data.count);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchCartItems = async () => {
-      const token = AuthService.getAccessToken();
-
-      try {
-        const response = await fetchCard(
-          { headers: { Authorization: token } },
-          limit,
-          offset
-        );
-        setCartItems(response.data.results);
-        setCount(response.data.count);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchCartItems();
   }, [limit, offset]);
 
@@ -74,6 +74,7 @@ const Cart = () => {
       setError(err.message);
       toast.warn(`Ошибка: ${err.message}`);
     }
+    fetchCartItems();
   };
 
   if (loading) {

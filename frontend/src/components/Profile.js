@@ -104,7 +104,6 @@ const Profile = () => {
         <h1>Профиль</h1>
       </div>
       <div>
-        <p>Username: {user.username}</p>
         <p>Имя: {user.first_name}</p>
         <p>Фамилия: {user.last_name}</p>
         <p>Email: {user.email}</p>

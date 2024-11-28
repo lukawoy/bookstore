@@ -46,6 +46,11 @@ const Header = () => {
     setNewReviews(false);
   };
 
+  const handleCheckNewReview = () => {
+    fetchFavoriteBooks();
+    checkForNewReviews();
+  };
+
   const fetchFavoriteBooks = async () => {
     const token = AuthService.getAccessToken();
 
@@ -61,10 +66,6 @@ const Header = () => {
   };
 
   useEffect(() => {
-    fetchFavoriteBooks();
-  }, []);
-
-  useEffect(() => {
     const savedCounts = localStorage.getItem("previousReviewCounts");
 
     if (savedCounts) {
@@ -72,12 +73,6 @@ const Header = () => {
       setPreviousReviewCounts(countsMap);
     }
   }, []);
-
-  useEffect(() => {
-    if (favoriteBooks.length > 0) {
-      checkForNewReviews();
-    }
-  }, [favoriteBooks]);
 
   return (
     <header className="header">
@@ -88,15 +83,21 @@ const Header = () => {
       <nav>
         <ul>
           <li>
-            <Link to="/">На главную</Link>
+            <Link to="/" onClick={handleCheckNewReview}>
+              На главную
+            </Link>
           </li>
           {isAuthenticated ? (
             <>
               <li>
-                <Link to="/cart">Корзина</Link>
+                <Link to="/cart" onClick={handleCheckNewReview}>
+                  Корзина
+                </Link>
               </li>
               <li>
-                <Link to="/favorites">Избранное</Link>
+                <Link to="/favorites" onClick={handleCheckNewReview}>
+                  Избранное
+                </Link>
                 {newReviews && (
                   <div
                     onClick={handleNewReviews}
@@ -121,7 +122,9 @@ const Header = () => {
                 )}
               </li>
               <li>
-                <Link to="/profile">Профиль</Link>
+                <Link to="/profile" onClick={handleCheckNewReview}>
+                  Профиль
+                </Link>
               </li>
               <li>
                 <button onClick={handleLogout}>Выйти</button>
@@ -130,7 +133,7 @@ const Header = () => {
           ) : (
             <>
               <li>
-                <Link to="/auth/jwt/create">Войти</Link>
+                <Link to="/auth/login">Войти</Link>
               </li>
               <li>
                 <Link to="/users">Регистрация</Link>

@@ -23,6 +23,7 @@
 - React
 - Docker (compose)
 - Github CI/CD
+- Swagger
 
 ### API
 Документация API находится по ссылке  https://lukabookstore.hopto.org/redoc/
