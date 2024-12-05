@@ -19,7 +19,7 @@ User = get_user_model()
 
 @receiver(post_save, sender=User)
 def my_handler(sender, instance, **kwargs):
-    ShoppingList.objects.create(user=instance)
+    ShoppingList.objects.get_or_create(user=instance)
 
 
 @extend_schema(tags=["Books"])
