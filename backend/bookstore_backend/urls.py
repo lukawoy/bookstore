@@ -1,23 +1,15 @@
 from django.contrib import admin
 from django.urls import include, path
-from rest_framework import permissions
-from drf_yasg.views import get_schema_view
-from drf_yasg import openapi
-
-schema_view = get_schema_view(
-    openapi.Info(
-        title="Bookstore API",
-        default_version="v1",
-        description="Description of the API of the Bookstore service",
-        contact=openapi.Contact(email="d.s.lukin@mail.ru"),
-    ),
-    public=True,
-    permission_classes=(permissions.AllowAny,),
-)
+from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include("users.urls")),
     path("api/", include("books.urls")),
-    path("redoc/", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
+    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
+    path("api/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
 ]
+
+# if settings.DEBUG:
+#     import debug_toolbar
+#     urlpatterns += (path('__debug__/', include(debug_toolbar.urls)),)

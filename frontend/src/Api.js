@@ -11,8 +11,8 @@ export const fetchAddFavorite = (headers, bookId, data) => api.post(`books/${boo
 
 // Card
 export const fetchCard = (headers, limit, offset) => api.get(`myshopinglist/?limit=${limit}&offset=${offset}`, headers);
-export const fetchDeleteCard = (headers, bookId) => api.delete(`books/${bookId}/shopinglist/`, headers);
-export const fetchAddCard = (headers, bookId, data) => api.post(`books/${bookId}/shopinglist/`, headers, data);
+export const fetchDeleteCard = (headers, bookId) => api.delete(`books/${bookId}/remove-book-from-cart/`, headers);
+export const fetchAddCard = (headers, bookId, data) => api.post(`books/${bookId}/add-to-cart/`, headers, data);
 
 // Book
 export const fetchBooks = (headers, limit, offset, search) => api.get(`books/?limit=${limit}&offset=${offset}&search=${search}`, headers);

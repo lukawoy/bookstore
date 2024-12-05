@@ -61,14 +61,14 @@ const Cart = () => {
     setOffset((prevOffset) => Math.max(prevOffset - limit, 0));
   };
 
-  const handleRemoveFromCart = async (bookId, itemId) => {
+  const handleRemoveFromCart = async (bookId) => {
     const token = AuthService.getAccessToken();
 
     try {
       await fetchDeleteCard({ headers: { Authorization: token } }, bookId);
-      setCartItems((prevItems) =>
-        prevItems.filter((item) => item.id !== itemId)
-      );
+      // setCartItems((prevItems) =>
+      //   prevItems.filter((item) => item.id !== itemId)
+      // );
       toast.success("Книга удалена из корзины!");
     } catch (err) {
       setError(err.message);
@@ -108,7 +108,7 @@ const Cart = () => {
           {cartItems.map((book) => (
             <div key={book.id} className="book-card">
               <div className="grid-item">
-                <Link to={`/books/${book.book_id}`} className="no-underline">
+                <Link to={`/books/${book.id}`} className="no-underline">
                   <h2>{book.title}</h2>
                 </Link>
                 <Book
@@ -125,7 +125,7 @@ const Cart = () => {
                   price={book.price}
                 />
                 <button
-                  onClick={() => handleRemoveFromCart(book.book_id, book.id)}
+                  onClick={() => handleRemoveFromCart(book.id)}
                 >
                   Удалить
                 </button>

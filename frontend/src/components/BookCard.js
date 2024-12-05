@@ -86,7 +86,7 @@ const BookCard = () => {
       );
       setReviews([...reviews, response.data]);
       setNewReviewText("");
-      setNewReviewScore(1);
+      setNewReviewScore(5);
       toast.success("Отзыв добавлен.");
     } catch (err) {
       if (err.response && err.response.status === 400) {
@@ -278,7 +278,7 @@ const BookCard = () => {
             ) : (
               <div>
                 <p className="review-author">
-                  Автор отзыва: {review.author_review.email}. Оценка:{" "}
+                  (ID {review.id}) Автор отзыва: {review.author_review.email}. Оценка:{" "}
                   {review.score} ★
                 </p>
                 <p className="review-text">{review.text}</p>

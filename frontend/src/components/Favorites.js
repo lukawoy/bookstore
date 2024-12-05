@@ -44,14 +44,14 @@ const Favorites = () => {
     setOffset((prevOffset) => Math.max(prevOffset - limit, 0));
   };
 
-  const handleRemoveFromFavor = async (bookId, favoId) => {
+  const handleRemoveFromFavor = async (bookId) => {
     const token = AuthService.getAccessToken();
 
     try {
       await fetchDeleteFavorite({ headers: { Authorization: token } }, bookId);
-      setFavorItems((prevItems) =>
-        prevItems.filter((item) => item.id !== favoId)
-      );
+      // setFavorItems((prevItems) =>
+      //   prevItems.filter((item) => item.id !== favoId)
+      // );
       toast.success("Книга удалена из избранного!");
     } catch (err) {
       setError(err.message);
@@ -85,7 +85,7 @@ const Favorites = () => {
           {favorItems.map((book) => (
             <div key={book.id} className="book-card">
               <div className="grid-item">
-                <Link to={`/books/${book.book_id}`} className="no-underline">
+                <Link to={`/books/${book.id}`} className="no-underline">
                   <h2>{book.title}</h2>
                 </Link>
                 <Book
@@ -102,7 +102,7 @@ const Favorites = () => {
                   price={book.price}
                 />
                 <button
-                  onClick={() => handleRemoveFromFavor(book.book_id, book.id)}
+                  onClick={() => handleRemoveFromFavor(book.id)}
                 >
                   Удалить
                 </button>

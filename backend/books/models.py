@@ -2,12 +2,11 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-from bookstore_backend.settings import (
-    MAXIMUM_PRICE,
-    MAXIMUM_SCORE,
-    MINIMUM_PRICE,
-    MINIMUM_SCORE,
-)
+MAXIMUM_PRICE = 999999
+MINIMUM_PRICE = 1
+MAXIMUM_SCORE = 5
+MINIMUM_SCORE = 1
+
 
 User = get_user_model()
 
@@ -34,14 +33,20 @@ class Book(models.Model):
     description = models.TextField("Краткое описание")
     image = models.ImageField("Вид книги", upload_to="books/images/", default=None)
     release_date = models.DateField("Дата выхода")
-    price = models.IntegerField(
+    price = models.DecimalField(
         "Цена",
+        max_digits=8,
+        decimal_places=2,
         validators=[
             MinValueValidator(MINIMUM_PRICE),
             MaxValueValidator(MAXIMUM_PRICE),
         ],
     )
+
     author = models.ManyToManyField(Author, verbose_name="Автор", through="AuthorBook")
+    favorites = models.ManyToManyField(
+        User, verbose_name="Избранное", related_name="favorites_books", blank=True
+    )
 
     class Meta:
         verbose_name = "Книга"
@@ -57,53 +62,24 @@ class AuthorBook(models.Model):
     author = models.ForeignKey(Author, on_delete=models.CASCADE, related_name="authors")
 
 
-class Favourites(models.Model):
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        verbose_name="Пользователь",
-        related_name="favourites_user",
-    )
-    book = models.ForeignKey(
-        Book,
-        on_delete=models.CASCADE,
-        verbose_name="Книга",
-        related_name="favourites_book",
-    )
-
-    class Meta:
-        verbose_name = "Избранное"
-        verbose_name_plural = "избранное"
-        ordering = ["-user"]
-
-    def __str__(self):
-        return f"{self.book.title} - {self.user.username}"
-
-
 class ShoppingList(models.Model):
-    user = models.ForeignKey(
+    user = models.OneToOneField(
         User,
         on_delete=models.CASCADE,
         verbose_name="Пользователь",
         related_name="shoppinglist_user",
     )
-    book = models.ForeignKey(
-        Book,
-        on_delete=models.CASCADE,
-        verbose_name="Книга",
-        related_name="shoppinglist_book",
+    book = models.ManyToManyField(
+        Book, verbose_name="Книга", related_name="shoppinglist_book", blank=True
     )
 
     class Meta:
         verbose_name = "список покупок"
         verbose_name_plural = "Списки покупок"
         ordering = ["-user"]
-        constraints = [
-            models.UniqueConstraint(fields=["book", "user"], name="unique_shopping"),
-        ]
 
     def __str__(self):
-        return f"{self.book.title} - {self.user.username}"
+        return f"Корзина ID {self.id}"
 
 
 class Review(models.Model):
@@ -135,4 +111,4 @@ class Review(models.Model):
         ]
 
     def __str__(self):
-        return f"Отзыв {self.author_review.username} на книгу {self.book.title}"
+        return f"Отзыв ID {self.id}. {self.text[:20]}..."

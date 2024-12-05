@@ -1,48 +1,137 @@
-from http import HTTPStatus
-
+from django.contrib.auth import get_user_model
 from django.db.models import Avg, Count
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.shortcuts import get_object_or_404
-from rest_framework import filters, viewsets
+from drf_spectacular.utils import (OpenApiParameter, extend_schema,
+                                   extend_schema_view)
+from rest_framework import filters, status, viewsets
+from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.decorators import action
 
-from .models import Book, Favourites, Review, ShoppingList
+from .models import Book, Review, ShoppingList
 from .permissions import AuthorPermission
-from .serializers import (
-    BookSerializer,
-    FavoriteSerializer,
-    ReviewSerializer,
-    ShoppingListSerializer,
+from .serializers import BookSerializer, ReviewSerializer
+
+User = get_user_model()
+
+
+@receiver(post_save, sender=User)
+def my_handler(sender, instance, **kwargs):
+    ShoppingList.objects.create(user=instance)
+
+
+@extend_schema(tags=["Books"])
+@extend_schema_view(
+    list=extend_schema(
+        summary="Список книг",
+    ),
+    retrieve=extend_schema(summary="Детальная информация о книге"),
 )
-
-
 class BookViewSet(viewsets.ReadOnlyModelViewSet):
+
     queryset = Book.objects.annotate(
         rating=Avg("book_review__score"), number_reviews=Count("book_review")
-    )
+    ).prefetch_related("author")
     serializer_class = BookSerializer
     permission_classes = (AllowAny,)
     filter_backends = [filters.SearchFilter]
     search_fields = ["title"]
 
+    @extend_schema(
+        summary="Рандомный список книг",
+    )
     @action(detail=False, methods=["GET"])
     def random_book(self, request):
-        random_books = Book.objects.order_by("?")[:5]
+        random_books = Book.objects.prefetch_related("author").order_by("?")[:5]
         serializer = self.get_serializer(random_books, many=True)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def list(self, request, *args, **kwargs):
-        """Получить список всех книг."""
-        return super().list(request, *args, **kwargs)
+    @extend_schema(
+        summary="Добавить книгу в избранное", methods=["POST"], tags=["Favorite"]
+    )
+    @extend_schema(
+        summary="Удалить книгу из избранного", methods=["DELETE"], tags=["Favorite"]
+    )
+    @action(
+        detail=True, methods=["POST", "DELETE"], permission_classes=(IsAuthenticated,)
+    )
+    def favorite(self, request, pk):
+        book = Book.objects.get(id=pk)
+        user = request.user
+        if request.method == "POST":
+            if (
+                user.favorites_books.prefetch_related("favorites")
+                .filter(id=pk)
+                .exists()
+            ):
+                return Response(
+                    {"message": "Данная книга уже в избранном!"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
-    def retrieve(self, request, *args, **kwargs):
-        """Получить книгу по ID."""
-        return super().retrieve(request, *args, **kwargs)
+            book.favorites.add(user)
+            return Response(status=status.HTTP_201_CREATED)
+
+        if user.favorites_books.prefetch_related("favorites").filter(id=pk).exists():
+            book.favorites.remove(user)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        return Response(
+            {"message": "Данной книги нет в избранном!"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    def get_cart(self):
+        cart, created = ShoppingList.objects.get_or_create(user=self.request.user)
+        return cart
+
+    @extend_schema(summary="Добавить книгу в корзину", tags=["Cart"])
+    @action(
+        detail=True,
+        methods=["POST"],
+        url_path="add-to-cart",
+        permission_classes=(IsAuthenticated,),
+    )
+    def add_book_to_cart(self, request, pk):
+        cart = self.get_cart()
+        current_book = get_object_or_404(Book, id=pk)
+        cart.book.add(current_book)
+        return Response(status=status.HTTP_201_CREATED)
+
+    @extend_schema(summary="Удалить книгу из корзины", tags=["Cart"])
+    @action(
+        detail=True,
+        methods=["DELETE"],
+        url_path="remove-book-from-cart",
+        permission_classes=(IsAuthenticated,),
+    )
+    def remove_book_from_cart(self, request, pk):
+        cart = self.get_cart()
+        current_book = get_object_or_404(Book, id=pk)
+
+        cart.book.remove(current_book)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+@extend_schema(tags=["Review"])
+@extend_schema_view(
+    list=extend_schema(
+        summary="Список отзывов для книги",
+    ),
+    retrieve=extend_schema(summary="Детальная информация об отзыве"),
+    create=extend_schema(
+        summary="Создать отзыв",
+    ),
+    update=extend_schema(
+        summary="Обновить отзыв",
+    ),
+    destroy=extend_schema(
+        summary="Удалить отзыв",
+    ),
+)
 class ReviewViewSet(viewsets.ModelViewSet):
-    queryset = Review.objects.all()
     serializer_class = ReviewSerializer
     permission_classes = (AuthorPermission,)
     http_method_names = ["post", "get", "delete", "put"]
@@ -54,121 +143,54 @@ class ReviewViewSet(viewsets.ModelViewSet):
         )
 
     def get_queryset(self):
-        return Review.objects.filter(book=self.kwargs.get("book_id"))
-
-    def create(self, request, *args, **kwargs):
-        """Создать новый отзыв для книги по её ID."""
-        return super().create(request, *args, **kwargs)
-
-    def update(self, request, *args, **kwargs):
-        """Редактировать отзыв по ID для книги по её ID."""
-        return super().update(request, *args, **kwargs)
-
-    def destroy(self, request, *args, **kwargs):
-        """Удалить отзыв по ID для книги по её ID."""
-        return super().destroy(request, *args, **kwargs)
-
-    def list(self, request, *args, **kwargs):
-        """Получить все отзывы для книги по её ID."""
-        return super().list(request, *args, **kwargs)
-
-    def retrieve(self, request, *args, **kwargs):
-        """Получить отзыв по ID для книги по её ID."""
-        return super().retrieve(request, *args, **kwargs)
+        return Review.objects.filter(book=self.kwargs.get("book_id")).select_related(
+            "author_review", "book"
+        )
 
 
+@extend_schema(tags=["Favorite"])
+@extend_schema_view(
+    list=extend_schema(
+        summary="Список избранных книг",
+    ),
+    retrieve=extend_schema(
+        summary="Детальная информация о избранной книге",
+        parameters=[
+            OpenApiParameter(name="id", location=OpenApiParameter.PATH, type=int)
+        ],
+    ),
+)
 class MyFavoriteViewSet(viewsets.ReadOnlyModelViewSet):
-    serializer_class = FavoriteSerializer
+    serializer_class = BookSerializer
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        return Favourites.objects.filter(user=self.request.user).annotate(
-            number_reviews=Count("book__book_review")
+        user = self.request.user
+        return (
+            user.favorites_books.prefetch_related("favorites")
+            .all()
+            .annotate(number_reviews=Count("book_review"))
         )
 
-    def list(self, request, *args, **kwargs):
-        """Получить список всех избранных книг."""
-        return super().list(request, *args, **kwargs)
 
-    def retrieve(self, request, *args, **kwargs):
-        """Получить книгу по её ID в избранном."""
-        return super().retrieve(request, *args, **kwargs)
-
-
-class ActionFavoriteViewSet(viewsets.ModelViewSet):
-    serializer_class = FavoriteSerializer
-    permission_classes = (IsAuthenticated,)
-    http_method_names = ["post", "delete"]
-
-    def get_queryset(self):
-        return Favourites.objects.filter(user=self.request.user)
-
-    def perform_create(self, serializer):
-        serializer.save(
-            user=self.request.user,
-            book=get_object_or_404(Book, id=self.kwargs.get("book_id")),
-        )
-
-    def delete(self, request, book_id):
-        book = get_object_or_404(Book, id=book_id)
-        if not book.favourites_book.filter(user__id=request.user.id).exists():
-            return Response(
-                {"errors": "Этой книги нет в избранном."}, status=HTTPStatus.BAD_REQUEST
-            )
-
-        get_object_or_404(
-            Favourites,
-            user=self.request.user,
-            book=get_object_or_404(Book, id=book_id),
-        ).delete()
-        return Response(status=HTTPStatus.NO_CONTENT)
-
-    def create(self, request, *args, **kwargs):
-        """Добавить книгу в избранное по её ID."""
-        return super().create(request, *args, **kwargs)
-
-    def destroy(self, request, *args, **kwargs):
-        """Удалить книгу из избранного по её ID."""
-        return super().destroy(request, *args, **kwargs)
-
-
+@extend_schema(tags=["Cart"])
+@extend_schema_view(
+    list=extend_schema(
+        summary="Список книг в корзине",
+    ),
+    retrieve=extend_schema(
+        summary="Детальная информация о книге в корзине",
+        parameters=[
+            OpenApiParameter(name="id", location=OpenApiParameter.PATH, type=int)
+        ],
+    ),
+)
 class MyShoppingListViewSet(viewsets.ReadOnlyModelViewSet):
-    serializer_class = ShoppingListSerializer
+    serializer_class = BookSerializer
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        return ShoppingList.objects.filter(user=self.request.user)
-
-    def list(self, request, *args, **kwargs):
-        """Получить список всех книг в корзине."""
-        return super().list(request, *args, **kwargs)
-
-    def retrieve(self, request, *args, **kwargs):
-        """Получить книгу по её ID в корзине."""
-        return super().retrieve(request, *args, **kwargs)
-
-
-class ActionShoppingListViewSet(ActionFavoriteViewSet):
-    serializer_class = ShoppingListSerializer
-
-    def delete(self, request, book_id):
-        book = get_object_or_404(Book, id=book_id)
-        if not book.shoppinglist_book.filter(user__id=request.user.id).exists():
-            return Response(
-                {"errors": "Этой книги нет в корзине."}, status=HTTPStatus.BAD_REQUEST
-            )
-
-        get_object_or_404(
-            ShoppingList,
-            user=self.request.user,
-            book=get_object_or_404(Book, id=book_id),
-        ).delete()
-        return Response(status=HTTPStatus.NO_CONTENT)
-
-    def create(self, request, *args, **kwargs):
-        """Добавить книгу в корзину по её ID."""
-        return super().create(request, *args, **kwargs)
-
-    def destroy(self, request, *args, **kwargs):
-        """Удалить книгу из корзины по её ID."""
-        return super().destroy(request, *args, **kwargs)
+        user = self.request.user
+        return Book.objects.filter(
+            shoppinglist_book=user.shoppinglist_user
+        ).prefetch_related("author")

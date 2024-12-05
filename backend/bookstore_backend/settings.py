@@ -32,8 +32,9 @@ INSTALLED_APPS = [
     "djoser",
     "books",
     "users",
-    "drf_yasg",
-    # "corsheaders"
+    "drf_spectacular",
+    # "corsheaders",
+    # 'debug_toolbar',
 ]
 
 MIDDLEWARE = [
@@ -45,7 +46,12 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     # "corsheaders.middleware.CorsMiddleware",
+    # 'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
+
+# INTERNAL_IPS = [
+#     '127.0.0.1', 'localhost',
+# ]
 
 ROOT_URLCONF = "bookstore_backend.urls"
 
@@ -101,9 +107,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-        'OPTIONS': {
-            'min_length': 8,
-        }
+        "OPTIONS": {
+            "min_length": 8,
+        },
     },
     {
         "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
@@ -157,6 +163,7 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": ("djoser.permissions.CurrentUserOrAdmin",),
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     "PAGE_SIZE": 5,
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 SIMPLE_JWT = {
@@ -173,8 +180,10 @@ DJOSER = {
     },
 }
 
-# Project variables
-MINIMUM_PRICE = 1
-MAXIMUM_PRICE = 99999999
-MINIMUM_SCORE = 1
-MAXIMUM_SCORE = 5
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Bookstore API",
+    "DESCRIPTION": "Description of the API of the Bookstore service",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    "CONTACT": {"email": "d.s.lukin@mail.ru"},
+}
