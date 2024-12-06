@@ -12,8 +12,8 @@ SECRET_KEY = os.getenv("SECRET_KEY", "DEFAULT_SECRET_KEY")
 
 DEBUG = os.getenv("MODE_DEBAG") == "True"
 
-# ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
-ALLOWED_HOSTS = [os.getenv("SERVER_IP", "123.123.123.123"), os.getenv("DOMAIN")]
+ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+# ALLOWED_HOSTS = [os.getenv("SERVER_IP", "123.123.123.123"), os.getenv("DOMAIN")]
 
 AUTH_USER_MODEL = "users.User"
 

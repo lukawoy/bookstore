@@ -135,7 +135,7 @@ npm start
 ```
 python manage.py import_data_json
 ```
-при этом в БД загрузятся данные из файлов Author.json и Books.json, находящихся в директории /backend/inital_data/
+при этом в БД загрузятся данные из файла /backend/inital_data/BooksAndAuthors.json
 
 
 Разработчик - Лукин Дмитрий.

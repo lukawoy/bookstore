@@ -25,55 +25,49 @@ logger.addHandler(stream_handler)
 source_directory_image = f"{settings.BASE_DIR}/inital_data/images"
 destination_directory_image = f"{settings.BASE_DIR}/media/books/images"
 
-names_data_files = ("Authors.json", "Books.json")
-
 
 class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         logger.info("Запись в БД начальных данных.")
-        for name_data_file in names_data_files:
-            path_file = f"{settings.BASE_DIR}/inital_data/{name_data_file}"
 
-            with open(path_file, encoding="utf-8-sig") as file:
-                json_data = json.load(file)
-            for row in json_data:
-                self._writing_data(row, name_data_file)
+        with open(
+            f"{settings.BASE_DIR}/inital_data/BooksAndAuthors.json",
+            encoding="utf-8-sig",
+        ) as file:
+            json_data = json.load(file)
+        for row in json_data:
+            self._writing_data(row)
 
         self._copying_images()
+        logger.info("Запись в БД закончена.")
 
-    def _writing_data(self, row, name_file):
-        if name_file == "Authors.json":
-            current_object, created = Author.objects.get_or_create(
-                first_name=row["first_name"],
-                last_name=row["last_name"],
-                middle_name=row["middle_name"],
+    def _writing_data(self, row):
+        logger.info(f"Запись книги '{row['title']}'")
+        current_object, created = Book.objects.get_or_create(
+            title=row["title"],
+            description=row["description"],
+            image=row["image"],
+            release_date=row["release_date"],
+            price=row["price"],
+        )
+        logger.info(
+            "Запись книги успешна." if created else "Книга уже существует в БД."
+        )
+        for author in row["authors"]:
+            logger.info(f"Запись автора '{author}'")
+            current_author, created = Author.objects.get_or_create(
+                first_name=author["first_name"],
+                last_name=author["last_name"],
+                middle_name=author["middle_name"],
             )
-        else:
-            current_object, created = Book.objects.get_or_create(
-                title=row["title"],
-                description=row["description"],
-                image=row["image"],
-                release_date=row["release_date"],
-                price=row["price"],
+            current_object.author.set([current_author])
+            logger.info(
+                "Запись автора успешна." if created else "Автор уже существует в БД."
             )
-            current_object.author.set(
-                Author.objects.filter(
-                    first_name=row["author"]["first_name"],
-                    last_name=row["author"]["last_name"],
-                    middle_name=row["author"]["middle_name"],
-                )
-            )
-
-        if not created:
-            logger.warning(
-                f"Запись {current_object} проигнорирована - уже существует в БД."
-            )
-        else:
-            logger.info(f"{current_object} - запись успешна.")
 
     def _copying_images(self):
-        logger.info("Копирование изображений книг")
+        logger.info("Копирование изображений книг.")
         os.makedirs(destination_directory_image, exist_ok=True)
 
         for filename in os.listdir(source_directory_image):
@@ -82,4 +76,4 @@ class Command(BaseCommand):
 
             if os.path.isfile(source_file):
                 shutil.copy(source_file, destination_file)
-                logger.info(f"Скопирован файл: {source_file} -> {destination_file}")
+                logger.info(f"Скопирован файл: {source_file} -> {destination_file}.")
