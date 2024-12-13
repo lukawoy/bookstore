@@ -13,7 +13,7 @@ User = get_user_model()
 
 class Author(models.Model):
     first_name = models.CharField("Имя", max_length=256)
-    last_name = models.CharField("Фамилия", max_length=256)
+    last_name = models.CharField("Фамилия", max_length=256, db_index=True)
     middle_name = models.CharField("Отчество", max_length=256, blank=True)
 
     class Meta:
@@ -29,7 +29,7 @@ class Author(models.Model):
 
 
 class Book(models.Model):
-    title = models.CharField("Название", max_length=256)
+    title = models.CharField("Название", max_length=256, db_index=True)
     description = models.TextField("Краткое описание")
     image = models.ImageField("Вид книги", upload_to="books/images/", default=None)
     release_date = models.DateField("Дата выхода")

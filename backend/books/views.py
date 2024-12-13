@@ -1,10 +1,9 @@
 from django.contrib.auth import get_user_model
-from django.db.models import Avg, Count
+from django.db.models import Avg, Count, Exists, OuterRef
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.shortcuts import get_object_or_404
-from drf_spectacular.utils import (OpenApiParameter, extend_schema,
-                                   extend_schema_view)
+from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -30,14 +29,27 @@ def my_handler(sender, instance, **kwargs):
     retrieve=extend_schema(summary="Детальная информация о книге"),
 )
 class BookViewSet(viewsets.ReadOnlyModelViewSet):
-
-    queryset = Book.objects.annotate(
-        rating=Avg("book_review__score"), number_reviews=Count("book_review")
-    ).prefetch_related("author")
     serializer_class = BookSerializer
     permission_classes = (AllowAny,)
     filter_backends = [filters.SearchFilter]
     search_fields = ["title"]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_authenticated:
+            return Book.objects.annotate(
+                rating=Avg("book_review__score"),
+                number_reviews=Count("book_review"),
+                is_favorite=Exists(user.favorites_books.filter(id=OuterRef("id"))),
+                is_shopping_list=Exists(
+                    ShoppingList.objects.filter(book__id=OuterRef("id"), user=user)
+                ),
+            ).prefetch_related("author")
+
+        return Book.objects.annotate(
+            rating=Avg("book_review__score"),
+            number_reviews=Count("book_review"),
+        ).prefetch_related("author")
 
     @extend_schema(
         summary="Рандомный список книг",
@@ -138,8 +150,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(
-            author_review=self.request.user,
-            book=get_object_or_404(Book, id=self.kwargs.get("book_id")),
+            author_review=self.request.user, book_id=self.kwargs.get("book_id")
         )
 
     def get_queryset(self):
@@ -166,10 +177,8 @@ class MyFavoriteViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        return (
-            user.favorites_books.prefetch_related("favorites")
-            .all()
-            .annotate(number_reviews=Count("book_review"))
+        return user.favorites_books.annotate(
+            number_reviews=Count("book_review"),
         )
 
 
@@ -191,6 +200,4 @@ class MyShoppingListViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        return Book.objects.filter(
-            shoppinglist_book=user.shoppinglist_user
-        ).prefetch_related("author")
+        return Book.objects.filter(shoppinglist_book__user=user)

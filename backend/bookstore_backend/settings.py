@@ -12,7 +12,6 @@ SECRET_KEY = os.getenv("SECRET_KEY", "DEFAULT_SECRET_KEY")
 
 DEBUG = os.getenv("MODE_DEBAG") == "True"
 
-# ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 ALLOWED_HOSTS = [os.getenv("SERVER_IP", "123.123.123.123"), os.getenv("DOMAIN")]
 
 AUTH_USER_MODEL = "users.User"
@@ -33,9 +32,8 @@ INSTALLED_APPS = [
     "books",
     "users",
     "drf_spectacular",
-    # "corsheaders",
-    # 'debug_toolbar',
 ]
+
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -45,13 +43,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    # "corsheaders.middleware.CorsMiddleware",
-    # 'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
-# INTERNAL_IPS = [
-#     '127.0.0.1', 'localhost',
-# ]
 
 ROOT_URLCONF = "bookstore_backend.urls"
 
@@ -79,12 +72,6 @@ WSGI_APPLICATION = "bookstore_backend.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.sqlite3",
-#         "NAME": BASE_DIR / "db.sqlite3",
-#     }
-# }
 
 DATABASES = {
     "default": {
@@ -150,7 +137,6 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# CORS_ORIGIN_ALLOW_ALL = True
 
 CSRF_COOKIE_SECURE = True
 CSRF_COOKIE_HTTPONLY = True
@@ -187,3 +173,31 @@ SPECTACULAR_SETTINGS = {
     "SERVE_INCLUDE_SCHEMA": False,
     "CONTACT": {"email": "d.s.lukin@mail.ru"},
 }
+
+
+if DEBUG:
+    ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+
+    INSTALLED_APPS += [
+        "corsheaders",
+        "debug_toolbar",
+    ]
+
+    MIDDLEWARE += [
+        "corsheaders.middleware.CorsMiddleware",
+        "debug_toolbar.middleware.DebugToolbarMiddleware",
+    ]
+
+    INTERNAL_IPS = [
+        "127.0.0.1",
+        "localhost",
+    ]
+
+    CORS_ORIGIN_ALLOW_ALL = True
+
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }

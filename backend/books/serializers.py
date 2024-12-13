@@ -44,8 +44,8 @@ class BookSerializer(serializers.ModelSerializer):
     )
     number_reviews = serializers.IntegerField(read_only=True)
     release_date = serializers.DateField(format="%d.%m.%Y")
-    is_favorite = serializers.SerializerMethodField()
-    is_shopping_list = serializers.SerializerMethodField()
+    is_favorite = serializers.BooleanField(default=False)
+    is_shopping_list = serializers.BooleanField(default=False)
 
     class Meta:
         model = Book
@@ -61,23 +61,6 @@ class BookSerializer(serializers.ModelSerializer):
             "rating",
             "is_favorite",
             "is_shopping_list",
-        )
-
-    def get_is_favorite(self, obj) -> bool:
-        user = self.context["request"].user
-        if user.is_authenticated:
-            return (
-                user.favorites_books.prefetch_related("favorites")
-                .filter(id=obj.id)
-                .exists()
-            )
-        return False
-
-    def get_is_shopping_list(self, obj) -> bool:
-        return (
-            obj.shoppinglist_book.prefetch_related("book")
-            .filter(user__id=self.context["request"].user.id)
-            .exists()
         )
 
 
@@ -97,7 +80,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         book = get_object_or_404(Book, id=self.context["view"].kwargs.get("book_id"))
         if (
             book.book_review.select_related("book")
-            .filter(author_review_id=self.context["request"].user.id)
+            .filter(author_review=self.context["request"].user)
             .exists()
             and self.context["request"].method != "PUT"
         ):
